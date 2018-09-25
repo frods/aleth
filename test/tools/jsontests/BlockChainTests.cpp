@@ -635,20 +635,25 @@ void overwriteBlockHeaderForTest(mObject const& _blObj, TestBlock& _block, Chain
     if (ho.size() != 14)
     {
         tmp = constructHeader(
-                    ho.count("parentHash") ? h256(ho["parentHash"].get_str()) : header.parentHash(),
-                ho.count("uncleHash") ? h256(ho["uncleHash"].get_str()) : header.sha3Uncles(),
+            ho.count("parentHash") ? h256(ho["parentHash"].get_str()) : header.parentHash(),
+            ho.count("uncleHash") ? h256(ho["uncleHash"].get_str()) : header.sha3Uncles(),
             ho.count("coinbase") ? Address(ho["coinbase"].get_str()) : header.author(),
-            ho.count("stateRoot") ? h256(ho["stateRoot"].get_str()): header.stateRoot(),
-            ho.count("transactionsTrie") ? h256(ho["transactionsTrie"].get_str()) : header.transactionsRoot(),
+            ho.count("stateRoot") ? h256(ho["stateRoot"].get_str()) : header.stateRoot(),
+            ho.count("transactionsTrie") ? h256(ho["transactionsTrie"].get_str()) :
+                                           header.transactionsRoot(),
             ho.count("receiptTrie") ? h256(ho["receiptTrie"].get_str()) : header.receiptsRoot(),
             ho.count("bloom") ? LogBloom(ho["bloom"].get_str()) : header.logBloom(),
-            ho.count("difficulty") ? toInt(ho["difficulty"]) :
-          ho.count("relDifficulty") ? header.difficulty() + toInt(ho["relDifficulty"]) : header.difficulty(),
+            ho.count("difficulty") ?
+                toInt(ho["difficulty"]) :
+                ho.count("relDifficulty") ? header.difficulty() + toInt(ho["relDifficulty"]) :
+                                            header.difficulty(),
             ho.count("number") ? toInt(ho["number"]) : header.number(),
             ho.count("gasLimit") ? toInt(ho["gasLimit"]) : header.gasLimit(),
             ho.count("gasUsed") ? toInt(ho["gasUsed"]) : header.gasUsed(),
-            ho.count("timestamp") ? toInt(ho["timestamp"]) : header.timestamp(),
-            ho.count("extraData") ? importByteArray(ho["extraData"].get_str()) : header.extraData());
+            ho.count("timestamp") ? max<u256>(toInt(ho["timestamp"]), 0) :
+                                    max<int64_t>(header.timestamp(), 0),
+            ho.count("extraData") ? importByteArray(ho["extraData"].get_str()) :
+                                    header.extraData());
 
         //Set block to update this parameters before mining the actual block
         _block.setPremine(ho.count("parentHash") ? "parentHash" : "");
