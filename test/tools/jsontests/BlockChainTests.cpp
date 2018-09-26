@@ -286,7 +286,7 @@ json_spirit::mObject fillBCTest(json_spirit::mObject const& _input)
         mObject blObj;
         if (blObjInput.count("blocknumber") > 0)
         {
-            importBlockNumber = max((int)toInt(blObjInput.at("blocknumber")), 1);
+            importBlockNumber = max((int)toU256(blObjInput.at("blocknumber")), 1);
             blObj["blocknumber"] = blObjInput.at("blocknumber");
         }
         else
@@ -644,13 +644,13 @@ void overwriteBlockHeaderForTest(mObject const& _blObj, TestBlock& _block, Chain
             ho.count("receiptTrie") ? h256(ho["receiptTrie"].get_str()) : header.receiptsRoot(),
             ho.count("bloom") ? LogBloom(ho["bloom"].get_str()) : header.logBloom(),
             ho.count("difficulty") ?
-                toInt(ho["difficulty"]) :
-                ho.count("relDifficulty") ? header.difficulty() + toInt(ho["relDifficulty"]) :
+                toU256(ho["difficulty"]) :
+                ho.count("relDifficulty") ? header.difficulty() + toU256(ho["relDifficulty"]) :
                                             header.difficulty(),
-            ho.count("number") ? toInt(ho["number"]) : header.number(),
-            ho.count("gasLimit") ? toInt(ho["gasLimit"]) : header.gasLimit(),
-            ho.count("gasUsed") ? toInt(ho["gasUsed"]) : header.gasUsed(),
-            ho.count("timestamp") ? max<u256>(toInt(ho["timestamp"]), 0) :
+            ho.count("number") ? toU256(ho["number"]) : header.number(),
+            ho.count("gasLimit") ? toU256(ho["gasLimit"]) : header.gasLimit(),
+            ho.count("gasUsed") ? toU256(ho["gasUsed"]) : header.gasUsed(),
+            ho.count("timestamp") ? max<u256>(toU256(ho["timestamp"]), 0) :
                                     max<int64_t>(header.timestamp(), 0),
             ho.count("extraData") ? importByteArray(ho["extraData"].get_str()) :
                                     header.extraData());
@@ -673,7 +673,7 @@ void overwriteBlockHeaderForTest(mObject const& _blObj, TestBlock& _block, Chain
         if (ho.count("RelTimestamp"))
         {
             BlockHeader parentHeader = importedBlocks.at(importedBlocks.size() - 1).blockHeader();
-            tmp.setTimestamp(toPositiveInt64(ho["RelTimestamp"]) + parentHeader.timestamp());
+            tmp.setTimestamp(toInt64(ho["RelTimestamp"]) + parentHeader.timestamp());
             tmp.setDifficulty(((const Ethash*)sealEngine)->calculateDifficulty(tmp, parentHeader));
         }
 
@@ -686,7 +686,7 @@ void overwriteBlockHeaderForTest(mObject const& _blObj, TestBlock& _block, Chain
 
     if (ho.count("populateFromBlock"))
     {
-        size_t number = (size_t)toInt(ho.at("populateFromBlock"));
+        size_t number = (size_t)toU256(ho.at("populateFromBlock"));
         ho.erase("populateFromBlock");
         if (number < importedBlocks.size())
         {
@@ -732,7 +732,7 @@ void overwriteUncleHeaderForTest(mObject& uncleHeaderObj, TestBlock& uncle, std:
 
     if (uncleHeaderObj.count("sameAsBlock"))
     {
-        size_t number = (size_t)toInt(uncleHeaderObj.at("sameAsBlock"));
+        size_t number = (size_t)toU256(uncleHeaderObj.at("sameAsBlock"));
         uncleHeaderObj.erase("sameAsBlock");
 
         if (number < importedBlocks.size())
@@ -744,7 +744,7 @@ void overwriteUncleHeaderForTest(mObject& uncleHeaderObj, TestBlock& uncle, std:
 
     if (uncleHeaderObj.count("sameAsPreviousBlockUncle"))
     {
-        size_t number = (size_t)toInt(uncleHeaderObj.at("sameAsPreviousBlockUncle"));
+        size_t number = (size_t)toU256(uncleHeaderObj.at("sameAsPreviousBlockUncle"));
         uncleHeaderObj.erase("sameAsPreviousBlockUncle");
         if (number < importedBlocks.size())
         {
@@ -771,7 +771,7 @@ void overwriteUncleHeaderForTest(mObject& uncleHeaderObj, TestBlock& uncle, std:
     if (uncleHeaderObj.count("populateFromBlock"))
     {
         uncleHeader.setTimestamp(time(0));
-        size_t number = (size_t)toInt(uncleHeaderObj.at("populateFromBlock"));
+        size_t number = (size_t)toU256(uncleHeaderObj.at("populateFromBlock"));
         uncleHeaderObj.erase("populateFromBlock");
         if (number < importedBlocks.size())
         {
@@ -788,7 +788,7 @@ void overwriteUncleHeaderForTest(mObject& uncleHeaderObj, TestBlock& uncle, std:
             {
                 BlockHeader parentHeader = importedBlocks.at(number).blockHeader();
                 uncleHeader.setTimestamp(
-                            toPositiveInt64(uncleHeaderObj["RelTimestamp"]) + parentHeader.timestamp());
+                    toInt64(uncleHeaderObj["RelTimestamp"]) + parentHeader.timestamp());
                 uncleHeader.setDifficulty(((const Ethash*)sealEngine)->calculateDifficulty(uncleHeader, parentHeader));
                 uncleHeaderObj.erase("RelTimestamp");
             }
@@ -804,22 +804,30 @@ void overwriteUncleHeaderForTest(mObject& uncleHeaderObj, TestBlock& uncle, std:
 
     if (overwrite != "false")
     {
-        uncleHeader = constructHeader(
-                    overwrite == "parentHash" ? h256(uncleHeaderObj.at("parentHash").get_str()) : uncleHeader.parentHash(),
-                    uncleHeader.sha3Uncles(),
-                    overwrite == "coinbase" ? Address(uncleHeaderObj.at("coinbase").get_str()) : uncleHeader.author(),
-                    overwrite == "stateRoot" ? h256(uncleHeaderObj.at("stateRoot").get_str()) : uncleHeader.stateRoot(),
-                    uncleHeader.transactionsRoot(),
-                    uncleHeader.receiptsRoot(),
-                    uncleHeader.logBloom(),
-                    overwrite == "difficulty" ? toInt(uncleHeaderObj.at("difficulty"))
-                                              :	overwrite == "timestamp" ? ((const Ethash*)sealEngine)->calculateDifficulty(uncleHeader, importedBlocks.at((size_t)uncleHeader.number() - 1).blockHeader())
-                                                                         : uncleHeader.difficulty(),
-                    overwrite == "number" ? toInt(uncleHeaderObj.at("number")) : uncleHeader.number(),
-                    overwrite == "gasLimit" ? toInt(uncleHeaderObj.at("gasLimit")) : uncleHeader.gasLimit(),
-                    overwrite == "gasUsed" ? toInt(uncleHeaderObj.at("gasUsed")) : uncleHeader.gasUsed(),
-                    overwrite == "timestamp" ? toInt(uncleHeaderObj.at("timestamp")) : uncleHeader.timestamp(),
-                    overwrite == "extraData" ? fromHex(uncleHeaderObj.at("extraData").get_str()) : uncleHeader.extraData());
+        uncleHeader = constructHeader(overwrite == "parentHash" ?
+                                          h256(uncleHeaderObj.at("parentHash").get_str()) :
+                                          uncleHeader.parentHash(),
+            uncleHeader.sha3Uncles(),
+            overwrite == "coinbase" ? Address(uncleHeaderObj.at("coinbase").get_str()) :
+                                      uncleHeader.author(),
+            overwrite == "stateRoot" ? h256(uncleHeaderObj.at("stateRoot").get_str()) :
+                                       uncleHeader.stateRoot(),
+            uncleHeader.transactionsRoot(), uncleHeader.receiptsRoot(), uncleHeader.logBloom(),
+            overwrite == "difficulty" ?
+                toU256(uncleHeaderObj.at("difficulty")) :
+                overwrite == "timestamp" ?
+                ((const Ethash*)sealEngine)
+                        ->calculateDifficulty(uncleHeader,
+                            importedBlocks.at((size_t)uncleHeader.number() - 1).blockHeader()) :
+                uncleHeader.difficulty(),
+            overwrite == "number" ? toU256(uncleHeaderObj.at("number")) : uncleHeader.number(),
+            overwrite == "gasLimit" ? toU256(uncleHeaderObj.at("gasLimit")) :
+                                      uncleHeader.gasLimit(),
+            overwrite == "gasUsed" ? toU256(uncleHeaderObj.at("gasUsed")) : uncleHeader.gasUsed(),
+            overwrite == "timestamp" ? toU256(uncleHeaderObj.at("timestamp")) :
+                                       uncleHeader.timestamp(),
+            overwrite == "extraData" ? fromHex(uncleHeaderObj.at("extraData").get_str()) :
+                                       uncleHeader.extraData());
     }
 
     uncle.setBlockHeader(uncleHeader);
