@@ -37,7 +37,7 @@ namespace dev
 namespace p2p
 {
 
-static const unsigned short c_defaultListenPort = 30303;
+static const unsigned short c_defaultListenPort = 30444;
 
 struct NetworkConfig
 {

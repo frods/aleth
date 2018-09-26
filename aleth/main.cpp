@@ -203,10 +203,10 @@ int main(int argc, char** argv)
 
     /// Networking params.
     string listenIP;
-    unsigned short listenPort = 30303;
+    unsigned short listenPort = 30444;
     string publicIP;
     string remoteHost;
-    unsigned short remotePort = 30303;
+    unsigned short remotePort = 30444;
 
     unsigned peers = 11;
     unsigned peerStretch = 7;
@@ -335,11 +335,11 @@ int main(int argc, char** argv)
     addNetworkingOption("listen-ip", po::value<string>()->value_name("<ip>(:<port>)"),
         "Listen on the given IP for incoming connections (default: 0.0.0.0)");
     addNetworkingOption("listen", po::value<unsigned short>()->value_name("<port>"),
-        "Listen on the given port for incoming connections (default: 30303)");
+        "Listen on the given port for incoming connections (default: 30444)");
     addNetworkingOption("remote,r", po::value<string>()->value_name("<host>(:<port>)"),
         "Connect to the given remote host (default: none)");
     addNetworkingOption("port", po::value<short>()->value_name("<port>"),
-        "Connect to the given remote port (default: 30303)");
+        "Connect to the given remote port (default: 30444)");
     addNetworkingOption("network-id", po::value<unsigned>()->value_name("<n>"),
         "Only connect to other hosts with this network id");
 #if ETH_MINIUPNPC
