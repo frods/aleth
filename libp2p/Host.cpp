@@ -488,7 +488,7 @@ std::unordered_map<Public, std::string> Host::pocHosts()
 {
     return {
         // Mainnet:
-        { Public("deb1904ebff9d6313fc4ecc00d4cfd926d556016e3d575849b7ded666fd60c4778d15d1a794b52fc3a451b5a61ea2a746c4e2a1f9eac3e44dc6f9889fc675d5c"), "34.229.176.108:30444" },
+        { Public("57cf43ea2a1581303c7112458b7eb47aecb9709de0a8ef8df8e1ddf03ad9f853e8ac16a841f1be95e87b10d55d7ebe01f6f0bd7d2819c9dabda611a782658aba"), "34.229.176.108:30444" },
     };
 }
 
