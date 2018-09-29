@@ -124,13 +124,17 @@ bool Session::readPacket(uint16_t _capId, PacketType _t, RLP const& _r)
     {
         // v4 frame headers are useless, offset packet type used
         // v5 protocol type is in header, packet type not offset
-        if (_capId == 0 && _t < UserPacket)
+        if (_capId == 0 && _t < UserPacket) {
             return interpret(_t, _r);
+        }
 
+        clog(VerbosityTrace, "net") << "Not a user packet " << _t << " looking for capability which can handle it";
         for (auto const& i: m_capabilities)
-            if (_t >= (int)i.second->m_idOffset && _t - i.second->m_idOffset < i.second->hostCapability()->messageCount())
+            if (_t >= (int)i.second->m_idOffset && _t - i.second->m_idOffset < i.second->hostCapability()->messageCount()) {
+                clog(VerbosityTrace, "net") << "Found capability " << i.first.first;
                 return i.second->enabled() ? i.second->interpret(_t - i.second->m_idOffset, _r) :
                                              true;
+            }
 
         return false;
     }

@@ -487,7 +487,7 @@ void EthereumHost::maintainTransactions()
             _p->prep(ts, TransactionsPacket, n).appendRaw(b, n);
             _p->sealAndSend(ts);
             LOG(m_logger) << "Sent " << n << " transactions to "
-                          << _p->session()->info().clientVersion;
+                          << _p->session()->info().host << ":" << _p->session()->info().clientVersion;
         }
         _p->m_requireTransactions = false;
         return true;

@@ -238,6 +238,8 @@ bool EthereumPeer::isCriticalSyncing() const
 
 bool EthereumPeer::interpret(unsigned _id, RLP const& _r)
 {
+    LOG(m_logger) << "EthereumPeer::interpret receivedPacket: " << _id << " " << _r;
+
     auto observer = m_observer.lock();
     auto hostData = m_hostData.lock();
     if (!observer || !hostData)

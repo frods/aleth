@@ -393,6 +393,7 @@ void TransactionQueue::verifierBody()
         try
         {
             Transaction t(work.transaction, CheckTransaction::Cheap); //Signature will be checked later
+            LOG(m_logger) << "TransactionQueue::verifierBody - verifying transaction: " << t;
             ImportResult ir = import(t);
             m_onImport(ir, t.sha3(), work.nodeId);
         }
